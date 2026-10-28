@@ -1,0 +1,34 @@
+{
+  "name": "backend-otp-auth-assessment",
+  "version": "1.0.0",
+  "private": true,
+  "description": "REST API for OTP-based user authentication with JWT",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "test": "node --test tests/unit/validation.test.js",
+    "test:integration": "node scripts/prepare-test-db.js && sequelize-cli db:migrate --env test && node --test tests/integration/api.test.js"
+  },
+  "engines": {
+    "node": ">=18.11"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "pg": "^8.13.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.6.2",
+    "supertest": "^7.1.1"
+  }
+}

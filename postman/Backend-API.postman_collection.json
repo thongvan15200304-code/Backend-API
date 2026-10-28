@@ -1,0 +1,132 @@
+{
+  "info": {
+    "_postman_id": "bc7b1988-f71d-4c0b-b180-4c38570ba20f",
+    "name": "Backend OTP Authentication API",
+    "description": "Set baseUrl and phoneNumber. OTP values are captured from development-mode responses.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "phoneNumber", "value": "8562056666666" },
+    { "key": "tempToken", "value": "" },
+    { "key": "otpCode", "value": "" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Request OTP",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone_number\": \"{{phoneNumber}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/users/request-otp"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('OTP request succeeds', function () { pm.response.to.have.status(201); });",
+            "pm.collectionVariables.set('tempToken', pm.response.headers.get('X-Temp-Token'));",
+            "if (pm.response.json().data.otp_code) pm.collectionVariables.set('otpCode', pm.response.json().data.otp_code);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Temp-Token", "value": "{{tempToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"otp_code\": \"{{otpCode}}\",\n  \"name\": \"John Doe\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/users/register"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Registration succeeds', function () { pm.response.to.have.status(201); });",
+            "if (pm.response.json().data.access_token) pm.collectionVariables.set('accessToken', pm.response.json().data.access_token);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-Temp-Token", "value": "{{tempToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"otp_code\": \"{{otpCode}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/users/login"
+      },
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Login succeeds', function () { pm.response.to.have.status(200); });",
+            "if (pm.response.json().data.access_token) pm.collectionVariables.set('accessToken', pm.response.json().data.access_token);"
+          ]
+        }
+      }]
+    },
+    {
+      "name": "Get Profile",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": "{{baseUrl}}/api/users/profile"
+      }
+    },
+    {
+      "name": "Update Profile",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Jane Doe\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/users/profile"
+      }
+    },
+    {
+      "name": "Update Profile Image",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "profile_image", "type": "file", "src": "" },
+            { "key": "name", "value": "Jane Doe", "type": "text" }
+          ]
+        },
+        "url": "{{baseUrl}}/api/users/profile"
+      }
+    }
+  ]
+}
